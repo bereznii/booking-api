@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+
+  nginx:
+    build:
+      context: docker/development/nginx
+    ports:
+      - "8099:80"
+    volumes:
+      - ./:/var/www/app
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    build:
+      context: docker/development/php-fpm
+    volumes:
+      - ./:/var/www/app
+    links:
+      - mysql
+
+  mysql:
+    build:
+      context: docker/development/mysql
+    ports:
+      - "33061:3306"
+    volumes:
+      - /var/www/db_dump:/var/lib/mysql
+
+  php-cli:
+    build:
+      context: docker/development/php-cli
+    volumes:
+      - ./:/var/www/app
+    depends_on:
+      - php-fpm
+      - mysql
+
+  php-queue:
+    build:
+      context: docker/development/php-queue
+    volumes:
+      - ./:/var/www/app

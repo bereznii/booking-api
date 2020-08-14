@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+
+  nginx:
+    image: ${REGISTRY}/booking_api:nginx_${IMAGE_TAG}
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    image: ${REGISTRY}/booking_api:php-fpm_${IMAGE_TAG}
+    restart: always
+    links:
+      - mysql
+
+  mysql:
+    image: ${REGISTRY}/booking_api:mysql_${IMAGE_TAG}
+    restart: always
+    ports:
+      - "33061:3306"
+    volumes:
+      - ./db_dump:/var/lib/mysql
+
+  php-cli:
+    image: ${REGISTRY}/booking_api:php-cli_${IMAGE_TAG}
+    restart: always
+    depends_on:
+      - php-fpm
+      - mysql
+
+  php-queue:
+    image: ${REGISTRY}/booking_api:php-queue_${IMAGE_TAG}
+    restart: always
+    depends_on:
+      - php-fpm
+      - php-cli
+      - mysql
